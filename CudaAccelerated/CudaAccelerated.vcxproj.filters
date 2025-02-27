@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CudaCompile Include="kernel.cu" />
+    <CudaCompile Include="include\Matrix\Matrix.cu">
+      <Filter>include\Matrix</Filter>
+    </CudaCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="include">
+      <UniqueIdentifier>{408ab025-2974-48ce-99c7-ae15f5994350}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\Matrix">
+      <UniqueIdentifier>{01e985a1-f5f4-47f3-a2a1-ad66ec23405d}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\Matrix\Matrix.hpp">
+      <Filter>include\Matrix</Filter>
+    </ClInclude>
+    <ClInclude Include="include\HeaderLibs.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="include\Matrix\Matrix.cpp">
+      <Filter>include\Matrix</Filter>
+    </ClCompile>
+    <ClCompile Include="Main.cpp" />
+  </ItemGroup>
+</Project>
