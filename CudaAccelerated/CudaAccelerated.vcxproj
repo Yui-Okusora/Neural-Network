@@ -84,6 +84,7 @@
     <CudaCompile Include="kernel.cu" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\FullyConnLayer.hpp" />
     <ClInclude Include="include\HeaderLibs.hpp" />
     <ClInclude Include="include\Matrix\Matrix.hpp" />
   </ItemGroup>

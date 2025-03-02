@@ -21,6 +21,9 @@
     <ClInclude Include="include\HeaderLibs.hpp">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\FullyConnLayer.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="include\Matrix\Matrix.cpp">

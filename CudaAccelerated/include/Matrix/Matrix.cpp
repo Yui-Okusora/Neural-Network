@@ -4,17 +4,16 @@ Matrix::Matrix(Matrix& a) {
     n_columns = a.getCols();
     n_rows = a.getRows();
 
-    m_values = (double*)calloc(n_rows * n_columns, sizeof(double));
-    memcpy(m_values, a.getFlatted(), sizeof(double) * n_rows * n_columns);
+    m_values = (float*)calloc(n_rows * n_columns, sizeof(float));
+    memcpy(m_values, a.getFlatted(), sizeof(float) * n_rows * n_columns);
 }
 
-Matrix::Matrix(const double* matrix, unsigned rows, unsigned cols)
+Matrix::Matrix(float* matrix, unsigned rows, unsigned cols)
 {
     n_columns = cols;
     n_rows = rows;
     
-    m_values = (double*)calloc(rows * cols, sizeof(double));
-    memcpy(m_values, matrix, sizeof(double) * rows * cols);
+    m_values = matrix;
 }
 
 Matrix::Matrix(unsigned rows, unsigned cols)
@@ -22,7 +21,7 @@ Matrix::Matrix(unsigned rows, unsigned cols)
     n_columns = cols;
     n_rows = rows;
     
-    m_values = (double*)calloc(rows * cols, sizeof(double));
+    m_values = (float*)calloc(rows * cols, sizeof(float));
 }
 
 Matrix::~Matrix()
@@ -35,8 +34,8 @@ void Matrix::copyVals(const Matrix& b)
     n_rows = b.getRows();
     n_columns = b.getCols();
     if (m_values != nullptr) free(m_values);
-    m_values = (double*)malloc(sizeof(double) * n_rows * n_columns);
-    memcpy(m_values, b.getFlatted(), sizeof(double) * n_rows * n_columns);
+    m_values = (float*)malloc(sizeof(float) * n_rows * n_columns);
+    memcpy(m_values, b.getFlatted(), sizeof(float) * n_rows * n_columns);
 }
 
 void Matrix::operator=(const Matrix& b)
@@ -44,21 +43,21 @@ void Matrix::operator=(const Matrix& b)
     n_rows = b.getRows();
     n_columns = b.getCols();
     if (m_values != nullptr) free(m_values);
-    m_values = (double*)malloc(sizeof(double) * n_rows * n_columns);
-    memcpy(m_values, b.getFlatted(), sizeof(double) * n_rows * n_columns);
+    m_values = (float*)malloc(sizeof(float) * n_rows * n_columns);
+    memcpy(m_values, b.getFlatted(), sizeof(float) * n_rows * n_columns);
 }
 
-double& Matrix::getValue(unsigned row, unsigned col)
+float& Matrix::getValue(unsigned row, unsigned col)
 {
     return m_values[n_columns * row + col];
 }
 
-double Matrix::getConst(unsigned row, unsigned col) const
+float Matrix::getConst(unsigned row, unsigned col) const
 {
     return m_values[n_columns * row + col];
 }
 
-Matrix Matrix::setRandomVals(double randVal(void))
+Matrix Matrix::setRandomVals(float randVal(void))
 {
     size_t size = getRows() * getCols();
     for (unsigned i = 0; i < size; ++i)
@@ -68,14 +67,11 @@ Matrix Matrix::setRandomVals(double randVal(void))
     return *this;
 }
 
-Matrix Matrix::fill(const double& x)
+Matrix Matrix::fill(const float& x)
 {
-    Matrix tmp = *this;
-    for (unsigned i = n_columns * n_rows; i > 0; --i)
-    {
-        tmp.getFlatted()[i] = x;
-    }
-    return tmp;
+    
+    memset(m_values, x, sizeof(float) * n_rows * n_columns);
+    return *this;
 }
 
 Matrix Matrix::add(Matrix& b)
@@ -85,7 +81,7 @@ Matrix Matrix::add(Matrix& b)
     return tmp;
 }
 
-Matrix Matrix::add(const double& b)
+Matrix Matrix::add(const float& b)
 {
     Matrix tmp(*this);
     YuiOkusora::Math::Mat::addVal2Matrix(&tmp, b);
@@ -112,7 +108,7 @@ Matrix Matrix::transpose()
     return tmp;
 }
 
-Matrix Matrix::multiply(double x)
+Matrix Matrix::multiply(float x)
 {
     Matrix tmp(*this);
     YuiOkusora::Math::Mat::multiplyVal2Matrix(&tmp, x);
@@ -144,7 +140,7 @@ Matrix Matrix::addPadding(unsigned paddingThickness = 0, unsigned top = 1, unsig
     {
         for (unsigned j = left * paddingThickness; j < n_columns + left * paddingThickness; ++j)
         {
-            double tmp2 = getValue(i - top * paddingThickness, j - left * paddingThickness);
+            float tmp2 = getValue(i - top * paddingThickness, j - left * paddingThickness);
             tmp.getValue(i, j) = tmp2;
         }
     }
@@ -160,7 +156,7 @@ Matrix Matrix::correlate(Matrix kernel, unsigned padding, unsigned stride)
     {
         for (unsigned inp_col = 0; inp_col <= (tmp.n_columns - kernel.n_columns); inp_col += stride)
         {
-            double sum = 0;
+            float sum = 0;
             for (unsigned k = 0; k < kernel.n_rows; ++k)
             {
                 for (unsigned g = 0; g < kernel.n_columns; ++g)
@@ -186,7 +182,7 @@ Matrix Matrix::convolute(Matrix kernel, unsigned padding, unsigned stride)
 {
     Matrix tmp = addPadding(1, 0, n_rows % 2, 0, n_columns % 2);
     if (padding != 0) tmp = addPadding(padding);
-    Matrix out(ceil((tmp.n_rows - size + 1) / (double)stride), ceil((tmp.n_columns - size + 1) / (double)stride));
+    Matrix out(ceil((tmp.n_rows - size + 1) / (float)stride), ceil((tmp.n_columns - size + 1) / (float)stride));
     MatrixRef ptr = tmp.submat(0, 0, 2, 2);
     for (unsigned i = 0; i < out.getRows(); ++i)
     {
@@ -220,10 +216,10 @@ Matrix Matrix::rot180()
     return tmp;
 }
 
-double Matrix::sum()
+float Matrix::sum()
 {
     size_t size = getRows() * getCols();
-    double sum = 0.0;
+    float sum = 0.0;
     for (unsigned i = 0; i < size; ++i)
     {
         sum += m_values[i];

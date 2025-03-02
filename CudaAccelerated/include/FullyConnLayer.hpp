@@ -1,5 +1,5 @@
 #pragma once
-#include "Matrix.hpp"
+#include "Matrix/Matrix.hpp"
 
 class FullyConnLayer
 {
@@ -9,8 +9,8 @@ public:
     Matrix feedForward(Matrix input);
     Matrix backward(Matrix outputGradient);
     Matrix calcOutputGradients(Matrix targetVals);
-    friend ofstream &operator<<(ofstream &out, FullyConnLayer &a);
-    friend ifstream &operator>>(ifstream &in, FullyConnLayer &a);
+    friend std::ofstream &operator<<(std::ofstream &out, FullyConnLayer &a);
+    friend std::ifstream &operator>>(std::ifstream &in, FullyConnLayer &a);
     static double eta; // [0.0...1.0] overall net training rate
 	static double alpha; // [0.0...n] multiplier of last weight change [momentum]
 	static double reluParam;
