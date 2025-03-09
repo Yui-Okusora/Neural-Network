@@ -42,6 +42,7 @@ void MemoryManager::createTmp(AdvancedMemory *memPtr, const size_t &fileSize)
 	if (tmp.hMapFile != NULL) CloseHandle(tmp.hMapFile);
 	tmp.hMapFile = CreateFileMapping(tmp.hFile, NULL, PAGE_READWRITE, dwHigh32bSize, dwLow32bSize, NULL);
 	tmp.dwFileSize = GetFileSize(tmp.hFile, NULL);
+	++fileID;
 }
 
 AdvancedMemory MemoryManager::createPmnt()
