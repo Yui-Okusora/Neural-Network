@@ -24,11 +24,15 @@
     <ClInclude Include="include\FullyConnLayer.hpp">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\MemoryManager\MemoryManager.hpp" />
+    <ClInclude Include="include\AdvancedMemory\AdvancedMemory.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="include\Matrix\Matrix.cpp">
       <Filter>include\Matrix</Filter>
     </ClCompile>
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="include\MemoryManager\MemoryManager.cpp" />
+    <ClCompile Include="include\AdvancedMemory\AdvancedMemory.cpp" />
   </ItemGroup>
 </Project>

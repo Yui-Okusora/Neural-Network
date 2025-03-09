@@ -1,5 +1,7 @@
 #pragma once
 #include "HeaderLibs.hpp"
+#include "AdvancedMemory/AdvancedMemory.hpp"
+#include "MemoryManager/MemoryManager.hpp"
 
 //template <typename dataType>
 class Matrix

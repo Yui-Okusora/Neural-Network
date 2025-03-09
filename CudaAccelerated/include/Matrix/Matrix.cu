@@ -98,13 +98,11 @@ namespace YuiOkusora
 			{
 				unsigned i = threadIdx.y + blockIdx.y * blockDim.y; // rows
 				unsigned j = threadIdx.x + blockIdx.x * blockDim.x; // cols
-				
+				unsigned k = threadIdx.z + blockIdx.z * blockDim.z;
+
 				if (i >= Arows || j >= Bcols) return;
 
-				for (unsigned k = 0; k < Acols; ++k)
-				{
-					c[i * Bcols + j] += a[i * Acols + k] * b[k * Bcols + j];
-				}
+				c[i * Bcols + j] += a[i * Acols + k] * b[k * Bcols + j];
 			}
 			
 		}
@@ -289,17 +287,25 @@ namespace YuiOkusora
 
 				dim3 blockNum(0,0,1), threadNum(0,0,1);
 
-				for (int i = 1; i <= 32; i = i << 1)
+				for (unsigned i = 1; i <= 16; i = i << 2)
+				{
+					threadNum.z = i;
+					blockNum.z = (unsigned)ceil(float(a->getCols()) / float(threadNum.z));
+					if (blockNum.z <= 26) break;
+				}
+
+				for (unsigned i = 1; i <= 32 / sqrt(threadNum.z); i = i << 1)
 				{
 					threadNum.y = i;
 					blockNum.y = (unsigned)ceil(float(a->getRows()) / float(threadNum.y));
 					if (blockNum.y <= 26) break;
 				}
 
-				for (int i = 1; i <= 1024; i = i << 1)
+				for (unsigned i = 1; i <= 1024; i = i << 1)
 				{
-					threadNum.x = i / threadNum.y;
-					blockNum.x = (unsigned)ceil(float(b.getCols()) / float(threadNum.x));
+					float tmp = i / float(threadNum.y * threadNum.z);
+					blockNum.x = (unsigned)ceil(float(b.getCols()) / tmp);
+					threadNum.x = (unsigned)ceil(tmp);
 					if (blockNum.x <= 26) break;
 				}
 
@@ -307,6 +313,8 @@ namespace YuiOkusora
 				//blockNum.y = (unsigned)ceil(float(b.getCols()) / float(threadNum.y));
 
 				YuiOkusora::Cuda::Matrix::__cudaDotProductMatrix<<<blockNum, threadNum>>>(aPtr, bPtr, cPtr, a->getRows(), a->getCols(), b.getCols());
+
+				cudaDeviceSynchronize();
 
 				free(a->getFlatted());
 
