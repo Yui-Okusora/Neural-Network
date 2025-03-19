@@ -78,7 +78,6 @@ void AdvancedMemory::closeAllPtr()
 
 AdvancedMemory::~AdvancedMemory()
 {
-	//printf("object destroyed");
 	closeAllPtr();
 }
 
