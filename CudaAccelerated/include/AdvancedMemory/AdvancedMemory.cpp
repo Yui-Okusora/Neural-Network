@@ -2,40 +2,83 @@
 #include "./MemoryManager/MemoryManager.hpp"
 #include <stdio.h>
 
-void AdvancedMemory::load(unsigned long offset, unsigned long size)
+ViewOfAdvancedMemory& AdvancedMemory::load(size_t offset, size_t size)
 {
-	MemMng.getUsedMemory() -= dwMapViewSize;
+	ViewOfAdvancedMemory view;
+	if (hMapFile == NULL) resize(size);
+	if (offset >= dwFileSize) return view;
+	if (offset + size >= dwFileSize) size = dwFileSize - offset;
 
 	DWORD dwFileMapStart // where to start the file map view
 	= (offset / MemMng.getSysGranularity()) * MemMng.getSysGranularity();
 
-	dwMapViewSize = (offset % MemMng.getSysGranularity()) + size;
-	iViewDelta = offset - dwFileMapStart;
+	view._offset = offset;
+	view.dwMapViewSize = (offset % MemMng.getSysGranularity()) + size;
+	view.iViewDelta = offset - dwFileMapStart;
 
-	if (lpMapAddress != NULL) UnmapViewOfFile(lpMapAddress);
+	DWORD dwHighFileMapStart = ((size_t)dwFileMapStart >> 32);
+	dwFileMapStart &= 0xFFFFFFFF;
 
-    lpMapAddress = MapViewOfFile(hMapFile,FILE_MAP_ALL_ACCESS, 0, dwFileMapStart, dwMapViewSize);
+    view.lpMapAddress = MapViewOfFile(hMapFile,FILE_MAP_ALL_ACCESS, dwHighFileMapStart, dwFileMapStart, view.dwMapViewSize);
 	
-	if (lpMapAddress == NULL)
-		printf(TEXT("lpMapAddress is NULL: last error: %d\n"), GetLastError());
+	if (view.lpMapAddress == NULL) return view;
 
-	MemMng.getUsedMemory() += dwMapViewSize;
+	usedMem += view.dwMapViewSize;
+
+	MemMng.getUsedMemory() += view.dwMapViewSize;
+
+	views[view.lpMapAddress] = view;
+
+	return views[view.lpMapAddress];
 }
 
-void AdvancedMemory::reserve(const size_t& fileSize)
+void AdvancedMemory::resize(const size_t& fileSize)
 {
-	DWORD dwHigh32bSize = fileSize >> 32, dwLow32bSize = fileSize & 0xFFFFFFFF;
-	if(hMapFile != NULL) CloseHandle(hMapFile);
-	hMapFile = CreateFileMapping(hFile, NULL, 0, dwHigh32bSize, dwLow32bSize, NULL);
+	unloadAll();
+	CloseHandle(hMapFile);
+	LONG dwHigh32bSize = fileSize >> 32, dwLow32bSize = fileSize & 0xFFFFFFFF;
+	SetFilePointer(hFile, dwLow32bSize, &dwHigh32bSize, FILE_BEGIN);
+	SetEndOfFile(hFile);
+
+	createMapObj();
+}
+
+void AdvancedMemory::createMapObj()
+{
+	hMapFile = CreateFileMapping(hFile, NULL, 0, 0, 0, NULL);
 	dwFileSize = GetFileSize(hFile, NULL);
+}
+
+void AdvancedMemory::unload(LPVOID viewAddress)
+{
+	ViewOfAdvancedMemory &view = views.at(viewAddress);
+	MemMng.getUsedMemory() -= view.dwMapViewSize;
+	view.dwMapViewSize = 0;
+	view.iViewDelta = 0;
+	view._offset = 0;
+	
+	UnmapViewOfFile(viewAddress);
+	view.lpMapAddress = NULL;
+	views.erase(viewAddress);
+}
+
+void AdvancedMemory::unloadAll()
+{
+	if (views.empty()) return;
+	for (auto &view : views)
+		unload(view.first);
+}
+
+void AdvancedMemory::closeAllPtr()
+{	
+	unloadAll();
+	if (hMapFile != NULL) CloseHandle(hMapFile);
+	if (hFile != NULL) CloseHandle(hFile);
 }
 
 AdvancedMemory::~AdvancedMemory()
 {
 	//printf("object destroyed");
-	MemMng.getUsedMemory() -= dwMapViewSize;
-	if (lpMapAddress != NULL) UnmapViewOfFile(lpMapAddress);
-	if (hMapFile != NULL) CloseHandle(hMapFile);
-	if (hFile != NULL) CloseHandle(hFile);
+	closeAllPtr();
 }
 
