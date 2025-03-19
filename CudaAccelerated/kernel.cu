@@ -5,6 +5,13 @@
 #include <stdio.h>
 #include "iostream"
 
+void loadMem()
+{
+	float* ptr;
+	cudaMalloc(&ptr, sizeof(float));
+	cudaFree(ptr);
+}
+
 void resetGPU()
 {
 	/*cudaDeviceProp DeviceProperties;

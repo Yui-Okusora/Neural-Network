@@ -1,8 +1,10 @@
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
 #include "Matrix.hpp"
+#include <chrono>
+#include <iostream>
 
-#define TILE_WIDTH 32
+#define TILE_WIDTH constexpr 32
 
 namespace YuiOkusora
 {
@@ -117,8 +119,12 @@ namespace YuiOkusora
 				cudaMalloc(&aPtr, sizeof(float) * a->getCols() * a->getRows());
 				cudaMalloc(&bPtr, sizeof(float) * a->getCols() * a->getRows());
 
-				cudaMemcpy(aPtr, a->getFlatted(), sizeof(float) * a->getCols() * a->getRows(), cudaMemcpyHostToDevice);
-				cudaMemcpy(bPtr, b.getFlatted(), sizeof(float) * a->getCols() * a->getRows(), cudaMemcpyHostToDevice);
+				ViewOfAdvancedMemory& viewA = a->load(0, sizeof(float) * a->getCols() * a->getRows());
+				ViewOfAdvancedMemory& viewB = b.load(0, sizeof(float) * a->getCols() * a->getRows());
+
+				cudaMemcpy(aPtr, a->getViewPtr(viewA), sizeof(float) * a->getCols() * a->getRows(), cudaMemcpyHostToDevice);
+				cudaMemcpy(bPtr, b.getViewPtr(viewB), sizeof(float) * a->getCols() * a->getRows(), cudaMemcpyHostToDevice);
+				b.unload(viewB.lpMapAddress);
 
 				unsigned blockNum = 1, threadsPerBlock = 0;
 				for (int i = 0; i <= 5; ++i) {
@@ -131,7 +137,9 @@ namespace YuiOkusora
 				
 				cudaDeviceSynchronize();
 				
-				cudaMemcpy(a->getFlatted(), aPtr, sizeof(float) * a->getCols() * a->getRows(), cudaMemcpyDeviceToHost);
+				cudaMemcpy(a->getViewPtr(viewA), aPtr, sizeof(float) * a->getCols() * a->getRows(), cudaMemcpyDeviceToHost);
+				a->unload(viewA.lpMapAddress);
+				
 				cudaFree(aPtr);
 				cudaFree(bPtr);
 				
@@ -143,7 +151,9 @@ namespace YuiOkusora
 				cudaMalloc(&aPtr, sizeof(float) * a->getCols() * a->getRows());
 				cudaMalloc(&bPtr, sizeof(float));
 
-				cudaMemcpy(aPtr, a->getFlatted(), sizeof(float) * a->getCols() * a->getRows(), cudaMemcpyHostToDevice);
+				ViewOfAdvancedMemory& viewA = a->load(0, sizeof(float) * a->getCols() * a->getRows());
+
+				cudaMemcpy(aPtr, a->getViewPtr(viewA), sizeof(float) * a->getCols() * a->getRows(), cudaMemcpyHostToDevice);
 				cudaMemcpy(bPtr, &b, sizeof(float), cudaMemcpyHostToDevice);
 
 				unsigned blockNum = 1, threadsPerBlock = 0;
@@ -157,7 +167,9 @@ namespace YuiOkusora
 
 				cudaDeviceSynchronize();
 
-				cudaMemcpy(a->getFlatted(), aPtr, sizeof(float) * a->getCols() * a->getRows(), cudaMemcpyDeviceToHost);
+				cudaMemcpy(a->getViewPtr(viewA), aPtr, sizeof(float) * a->getCols() * a->getRows(), cudaMemcpyDeviceToHost);
+				a->unload(viewA.lpMapAddress);
+				
 				cudaFree(aPtr);
 				cudaFree(bPtr);
 
@@ -169,8 +181,12 @@ namespace YuiOkusora
 				cudaMalloc(&aPtr, sizeof(float) * a->getCols() * a->getRows());
 				cudaMalloc(&bPtr, sizeof(float) * a->getCols() * a->getRows());
 
-				cudaMemcpy(aPtr, a->getFlatted(), sizeof(float) * a->getCols() * a->getRows(), cudaMemcpyHostToDevice);
-				cudaMemcpy(bPtr, b.getFlatted(), sizeof(float) * a->getCols() * a->getRows(), cudaMemcpyHostToDevice);
+				ViewOfAdvancedMemory& viewA = a->load(0, sizeof(float) * a->getCols() * a->getRows());
+				ViewOfAdvancedMemory& viewB = b.load(0, sizeof(float) * a->getCols() * a->getRows());
+
+				cudaMemcpy(aPtr, a->getViewPtr(viewA), sizeof(float) * a->getCols() * a->getRows(), cudaMemcpyHostToDevice);
+				cudaMemcpy(bPtr, b.getViewPtr(viewB), sizeof(float) * a->getCols() * a->getRows(), cudaMemcpyHostToDevice);
+				b.unload(viewB.lpMapAddress);
 
 				unsigned blockNum = 1, threadsPerBlock = 0;
 				for (int i = 0; i <= 5; ++i) {
@@ -183,7 +199,9 @@ namespace YuiOkusora
 
 				cudaDeviceSynchronize();
 
-				cudaMemcpy(a->getFlatted(), aPtr, sizeof(float) * a->getCols() * a->getRows(), cudaMemcpyDeviceToHost);
+				cudaMemcpy(a->getViewPtr(viewA), aPtr, sizeof(float) * a->getCols() * a->getRows(), cudaMemcpyDeviceToHost);
+				a->unload(viewA.lpMapAddress);
+				
 				cudaFree(aPtr);
 				cudaFree(bPtr);
 
@@ -195,7 +213,9 @@ namespace YuiOkusora
 				cudaMalloc(&aPtr, sizeof(float) * a->getCols() * a->getRows());
 				cudaMalloc(&bPtr, sizeof(float) * a->getCols() * a->getRows());
 
-				cudaMemcpy(aPtr, a->getFlatted(), sizeof(float) * a->getCols() * a->getRows(), cudaMemcpyHostToDevice);
+				ViewOfAdvancedMemory& viewA = a->load(0, sizeof(float) * a->getCols() * a->getRows());
+
+				cudaMemcpy(aPtr, a->getViewPtr(viewA), sizeof(float) * a->getCols() * a->getRows(), cudaMemcpyHostToDevice);
 
 				dim3 blockNum(0,0,1), threadNum(0,0,1);
 				for (int i = 1; i <= 32;++i)
@@ -216,7 +236,8 @@ namespace YuiOkusora
 
 				cudaDeviceSynchronize();
 
-				cudaMemcpy(a->getFlatted(), bPtr, sizeof(float) * a->getCols() * a->getRows(), cudaMemcpyDeviceToHost);
+				cudaMemcpy(a->getViewPtr(viewA), bPtr, sizeof(float) * a->getCols() * a->getRows(), cudaMemcpyDeviceToHost);
+				a->unload(viewA.lpMapAddress);
 
 				cudaFree(aPtr);
 				cudaFree(bPtr);
@@ -229,7 +250,9 @@ namespace YuiOkusora
 				cudaMalloc(&aPtr, sizeof(float) * a->getCols() * a->getRows());
 				cudaMalloc(&bPtr, sizeof(float));
 
-				cudaMemcpy(aPtr, a->getFlatted(), sizeof(float) * a->getCols() * a->getRows(), cudaMemcpyHostToDevice);
+				ViewOfAdvancedMemory& viewA = a->load(0, sizeof(float) * a->getCols() * a->getRows());
+
+				cudaMemcpy(aPtr, a->getViewPtr(viewA), sizeof(float) * a->getCols() * a->getRows(), cudaMemcpyHostToDevice);
 				cudaMemcpy(bPtr, &b, sizeof(float), cudaMemcpyHostToDevice);
 
 				unsigned blockNum = 1, threadsPerBlock = 0;
@@ -243,7 +266,9 @@ namespace YuiOkusora
 
 				cudaDeviceSynchronize();
 
-				cudaMemcpy(a->getFlatted(), aPtr, sizeof(float) * a->getCols() * a->getRows(), cudaMemcpyDeviceToHost);
+				cudaMemcpy(a->getViewPtr(viewA), aPtr, sizeof(float) * a->getCols() * a->getRows(), cudaMemcpyDeviceToHost);
+				a->unload(viewA.lpMapAddress);
+				
 				cudaFree(aPtr);
 				cudaFree(bPtr);
 			}
@@ -254,8 +279,13 @@ namespace YuiOkusora
 				cudaMalloc(&aPtr, sizeof(float) * a->getCols() * a->getRows());
 				cudaMalloc(&bPtr, sizeof(float) * b.getCols() * b.getRows());
 
-				cudaMemcpy(aPtr, a->getFlatted(), sizeof(float) * a->getCols() * a->getRows(), cudaMemcpyHostToDevice);
-				cudaMemcpy(bPtr, b.getFlatted(), sizeof(float) * b.getCols() * b.getRows(), cudaMemcpyHostToDevice);
+				ViewOfAdvancedMemory& viewA = a->load(0, sizeof(float) * a->getCols() * a->getRows());
+				ViewOfAdvancedMemory& viewB = b.load(0, sizeof(float) * b.getCols() * b.getRows());
+
+				cudaMemcpy(aPtr, a->getViewPtr(viewA), sizeof(float) * a->getCols() * a->getRows(), cudaMemcpyHostToDevice);
+				cudaMemcpy(bPtr, b.getViewPtr(viewB), sizeof(float) * b.getCols() * b.getRows(), cudaMemcpyHostToDevice);
+
+				b.unload(viewB.lpMapAddress);
 
 				unsigned blockNum = 1, threadsPerBlock = 0;
 				for (int i = 0; i <= 5; ++i) {
@@ -268,7 +298,9 @@ namespace YuiOkusora
 
 				cudaDeviceSynchronize();
 
-				cudaMemcpy(a->getFlatted(), aPtr, sizeof(float) * a->getCols() * a->getRows(), cudaMemcpyDeviceToHost);
+				cudaMemcpy(a->getViewPtr(viewA), aPtr, sizeof(float) * a->getCols() * a->getRows(), cudaMemcpyDeviceToHost);
+				a->unload(viewA.lpMapAddress);
+				
 				cudaFree(aPtr);
 				cudaFree(bPtr);
 			}
@@ -276,14 +308,28 @@ namespace YuiOkusora
 			void dotProductMatrix(Matrix* a, Matrix& b)
 			{
 				float* aPtr = nullptr, * bPtr = nullptr, * cPtr = nullptr;
+				auto aSIZE = a->getRows() * a->getCols(), bSIZE = b.getRows() * b.getCols(), cSIZE = a->getRows() * b.getCols();
 
-				cudaMalloc(&aPtr, sizeof(float) * a->getRows() * a->getCols());
-				cudaMalloc(&bPtr, sizeof(float) * b.getRows() * b.getCols());
-				cudaMalloc(&cPtr, sizeof(float) * a->getRows() * b.getCols());
+				std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
 
-				cudaMemset(cPtr, 0, sizeof(float) * a->getRows() * b.getCols());
-				cudaMemcpy(aPtr, a->getFlatted(), sizeof(float) * a->getRows() * a->getCols(), cudaMemcpyHostToDevice);
-				cudaMemcpy(bPtr, b.getFlatted(), sizeof(float) * b.getRows() * b.getCols(), cudaMemcpyHostToDevice);
+				cudaMalloc(&aPtr, sizeof(float) * (static_cast<size_t>(aSIZE) + bSIZE + cSIZE));
+				bPtr = aPtr + bSIZE;
+				cPtr = aPtr + cSIZE;
+
+				cudaMemset(cPtr, 0, sizeof(float) * cSIZE);
+
+				ViewOfAdvancedMemory& viewA = a->load(0, sizeof(float) * aSIZE);
+				ViewOfAdvancedMemory& viewB = b.load(0, sizeof(float) * bSIZE);
+
+				cudaMemcpy(aPtr, a->getViewPtr(viewA), sizeof(float) * aSIZE, cudaMemcpyHostToDevice);
+				cudaMemcpy(bPtr, b.getViewPtr(viewB), sizeof(float) * bSIZE, cudaMemcpyHostToDevice);
+
+				a->unload(viewA.lpMapAddress);
+				b.unload(viewB.lpMapAddress);
+
+				std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
+
+				std::cout << std::chrono::duration<long long, std::nano>(end - start).count() << "\n";
 
 				dim3 blockNum(0,0,1), threadNum(0,0,1);
 
@@ -316,11 +362,11 @@ namespace YuiOkusora
 
 				cudaDeviceSynchronize();
 
-				free(a->getFlatted());
+				a->resize(cSIZE);
+				ViewOfAdvancedMemory& viewC = a->load(0, sizeof(float) * cSIZE);
 
-				a->getDataPtr() = (float*)malloc(sizeof(float) * a->getRows() * b.getCols());
-
-				cudaMemcpy(a->getFlatted(), cPtr, sizeof(float) * a->getRows() * b.getCols(), cudaMemcpyDeviceToHost);
+				cudaMemcpy(a->getViewPtr(viewC), cPtr, sizeof(float) * cSIZE, cudaMemcpyDeviceToHost);
+				a->unload(viewC.lpMapAddress);
 
 				cudaFree(aPtr);
 				cudaFree(bPtr);
@@ -331,8 +377,10 @@ namespace YuiOkusora
 			{
 				float* aPtr;
 				cudaMalloc(&aPtr, sizeof(float) * a->getCols() * a->getRows());
+
+				ViewOfAdvancedMemory& viewA = a->load(0, sizeof(float) * a->getCols() * a->getRows());
 				
-				cudaMemcpy(aPtr, a->getFlatted(), sizeof(float) * a->getCols() * a->getRows(), cudaMemcpyHostToDevice);
+				cudaMemcpy(aPtr, a->getViewPtr(viewA), sizeof(float) * a->getCols() * a->getRows(), cudaMemcpyHostToDevice);
 
 				unsigned blockNum = 1, threadsPerBlock = 0;
 				for (int i = 0; i <= 5; ++i) {
@@ -345,7 +393,9 @@ namespace YuiOkusora
 
 				cudaDeviceSynchronize();
 
-				cudaMemcpy(a->getFlatted(), aPtr, sizeof(float) * a->getCols() * a->getRows(), cudaMemcpyDeviceToHost);
+				cudaMemcpy(a->getViewPtr(viewA), aPtr, sizeof(float) * a->getCols() * a->getRows(), cudaMemcpyDeviceToHost);
+				a->unload(viewA.lpMapAddress);
+				
 				cudaFree(aPtr);
 			}
 		}

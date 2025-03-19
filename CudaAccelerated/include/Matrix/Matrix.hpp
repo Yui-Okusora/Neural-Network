@@ -3,29 +3,32 @@
 #include "AdvancedMemory/AdvancedMemory.hpp"
 #include "MemoryManager/MemoryManager.hpp"
 
-//template <typename dataType>
 class Matrix
 {
 public:
     Matrix(Matrix& a);
+    Matrix(AdvancedMemory* ptr, unsigned rows, unsigned cols);
     Matrix(float* matrix, unsigned rows, unsigned cols);
     Matrix(unsigned rows, unsigned cols);
-    float* getFlatted() const {return m_values;}
-    float* &getDataPtr() { return m_values; }
-    float& getValue(unsigned row, unsigned col);
-    float getConst(unsigned row, unsigned col) const;
+    
+    ViewOfAdvancedMemory& load(size_t offset, size_t size);
+    void unload(LPVOID viewAddress);
+    float& getValue(unsigned row, unsigned col, const ViewOfAdvancedMemory& view);
+    void* getViewPtr(const ViewOfAdvancedMemory& view) { return (void*)((char*)view.lpMapAddress + view.iViewDelta); }
+
     unsigned getRows() const {return n_rows;}
     unsigned getCols() const {return n_columns;}
     void setRows(unsigned rows) { n_rows = rows; }
     void setCols(unsigned cols) { n_columns = cols; }
+    void resize(unsigned size);
     void print();
+    void printFlat(std::ofstream &f);
+    void read(std::ifstream &f);
+    void operator=(const Matrix &b);
     friend std::ostream &operator<<(std::ostream &out, const Matrix &a);
     friend std::ofstream &operator<<(std::ofstream &out, const Matrix &a);
     friend std::ifstream &operator>>(std::ifstream &in, const Matrix &a);
-    void printFlat(std::ofstream &f);
-    void read(std::ifstream &f);
-    void copyVals(const Matrix &b);
-    void operator=(const Matrix &b);
+    
     Matrix setRandomVals(float randVal(void));
     Matrix fill(const float &x);
     Matrix add(Matrix &b);
@@ -35,18 +38,18 @@ public:
     Matrix multiply(Matrix &b);
     Matrix multiply(float x);
     Matrix dotProduct(Matrix &b);
-    Matrix addPadding(unsigned paddingThickness, unsigned top, unsigned bot, unsigned left, unsigned right);
-    Matrix correlate(Matrix kernel, unsigned padding, unsigned stride);
-    Matrix convolute(Matrix kernel, unsigned padding, unsigned stride);
+    //Matrix addPadding(unsigned paddingThickness, unsigned top, unsigned bot, unsigned left, unsigned right);
+    //Matrix correlate(Matrix kernel, unsigned padding, unsigned stride);
+    //Matrix convolute(Matrix kernel, unsigned padding, unsigned stride);
     //Matrix pool(unsigned size, unsigned padding, unsigned stride);
     //MatrixRef submat(unsigned startRow, unsigned startCol, unsigned rowSize, unsigned colSize);
-    Matrix rot180(); //cannot be used
+    Matrix rot180();
     float sum();
     ~Matrix();
 private:
-    float* m_values = nullptr;
     unsigned n_columns = 0;
     unsigned n_rows = 0;
+    AdvancedMemory m_values;
 };
 
 // --------------- INTERNAL ---------------
