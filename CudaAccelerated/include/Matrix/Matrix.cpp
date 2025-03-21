@@ -1,10 +1,15 @@
 #include "Matrix.hpp"
 
+Matrix::Matrix()
+{
+
+}
+
 Matrix::Matrix(Matrix& a) {
     n_columns = a.getCols();
     n_rows = a.getRows();
 
-    MemMng.memcopy(&m_values, &a.m_values, sizeof(float) * n_columns * n_rows);
+    MemMng.memcopy(&m_values, &a.m_values, sizeof(float), sizeof(float) * n_columns * n_rows);
 }
 
 Matrix::Matrix(AdvancedMemory* ptr, unsigned rows, unsigned cols)
@@ -12,7 +17,7 @@ Matrix::Matrix(AdvancedMemory* ptr, unsigned rows, unsigned cols)
     n_columns = cols;
     n_rows = rows;
 
-    MemMng.memcopy(&m_values, ptr, sizeof(float) * rows * cols);
+    MemMng.memcopy(&m_values, ptr, sizeof(float), sizeof(float) * rows * cols);
 }
 
 Matrix::Matrix(float* matrix, unsigned rows, unsigned cols)
@@ -35,14 +40,14 @@ Matrix::Matrix(unsigned rows, unsigned cols)
 
 Matrix::~Matrix()
 {
-    m_values.~AdvancedMemory();
+    //m_values.~AdvancedMemory();
 }
 
-void Matrix::operator=(const Matrix& b)
+void Matrix::operator=(Matrix& b)
 {
     n_rows = b.getRows();
     n_columns = b.getCols();
-    MemMng.memcopy(&m_values, &const_cast<Matrix&>(b).m_values, sizeof(float) * n_rows * n_columns);
+    MemMng.memcopy(&m_values, &b.m_values, sizeof(float), sizeof(float) * n_rows * n_columns);
 }
 
 float& Matrix::getValue(unsigned row, unsigned col, const ViewOfAdvancedMemory& view)
@@ -86,6 +91,8 @@ Matrix Matrix::fill(const float& x)
 Matrix Matrix::add(Matrix& b)
 {
     Matrix tmp(*this);
+    if (n_rows != b.getRows() || n_columns != b.getCols())
+        throw std::out_of_range("Adding matrixes are not the same dimensions\n");
     YuiOkusora::Math::Mat::addMatrix(&tmp, b);
     return tmp;
 }
@@ -100,6 +107,8 @@ Matrix Matrix::add(const float& b)
 Matrix Matrix::subtr(Matrix& b)
 {
     Matrix tmp(*this);
+    if (n_rows != b.getRows() || n_columns != b.getCols())
+        throw std::out_of_range("Subtracting matrixes are not the same dimensions\n");
     YuiOkusora::Math::Mat::subtractMatrix(&tmp, b);
     return tmp;
 }
@@ -127,6 +136,8 @@ Matrix Matrix::multiply(float x)
 Matrix Matrix::multiply(Matrix& b)
 {
     Matrix tmp(*this);
+    if (n_rows != b.getRows() || n_columns != b.getCols())
+        throw std::out_of_range("Scaling matrixes are not the same dimensions\n");
     YuiOkusora::Math::Mat::multiplyMat2Matrix(&tmp, b);
     return tmp;
 }
@@ -135,8 +146,9 @@ Matrix Matrix::dotProduct(Matrix& b)
 {
     
     Matrix tmp(*this);
+    if (n_columns != b.getRows())
+        throw std::out_of_range("Multipling matrix A columns not equal matrix B rows\n");
     YuiOkusora::Math::Mat::dotProductMatrix(&tmp, b);
-
     tmp.setCols(b.getRows());
 
     return tmp;

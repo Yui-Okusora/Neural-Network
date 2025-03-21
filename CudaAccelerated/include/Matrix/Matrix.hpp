@@ -6,6 +6,7 @@
 class Matrix
 {
 public:
+    Matrix();
     Matrix(Matrix& a);
     Matrix(AdvancedMemory* ptr, unsigned rows, unsigned cols);
     Matrix(float* matrix, unsigned rows, unsigned cols);
@@ -24,10 +25,10 @@ public:
     void print();
     void printFlat(std::ofstream &f);
     void read(std::ifstream &f);
-    void operator=(const Matrix &b);
-    friend std::ostream &operator<<(std::ostream &out, const Matrix &a);
-    friend std::ofstream &operator<<(std::ofstream &out, const Matrix &a);
-    friend std::ifstream &operator>>(std::ifstream &in, const Matrix &a);
+    void operator=(Matrix &b);
+    friend std::ostream &operator<<(std::ostream &out, Matrix &a);
+    friend std::ofstream &operator<<(std::ofstream &out, Matrix &a);
+    friend std::ifstream &operator>>(std::ifstream &in, Matrix &a);
     
     Matrix setRandomVals(float randVal(void));
     Matrix fill(const float &x);

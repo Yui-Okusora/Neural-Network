@@ -4,8 +4,6 @@
 #include <chrono>
 #include <iostream>
 
-#define TILE_WIDTH constexpr 32
-
 namespace YuiOkusora
 {
 	namespace Cuda
@@ -98,13 +96,13 @@ namespace YuiOkusora
 
 			__global__ static void __cudaDotProductMatrix(float* a, float* b, float* c, size_t Arows, size_t Acols, size_t Bcols)
 			{
-				unsigned i = threadIdx.y + blockIdx.y * blockDim.y; // rows
-				unsigned j = threadIdx.x + blockIdx.x * blockDim.x; // cols
-				unsigned k = threadIdx.z + blockIdx.z * blockDim.z;
+				unsigned i = threadIdx.y + blockIdx.y * blockDim.y; // rows 4
+				unsigned j = threadIdx.x + blockIdx.x * blockDim.x; // cols 3
+				unsigned k = threadIdx.z + blockIdx.z * blockDim.z; //      3
 
-				if (i >= Arows || j >= Bcols) return;
-
-				c[i * Bcols + j] += a[i * Acols + k] * b[k * Bcols + j];
+				if (i >= Arows || j >= Bcols || k >= Acols) return;
+	
+				atomicAdd(&c[i * Bcols + j], a[i * Acols + k] * b[k * Bcols + j]);
 			}
 			
 		}
@@ -308,13 +306,15 @@ namespace YuiOkusora
 			void dotProductMatrix(Matrix* a, Matrix& b)
 			{
 				float* aPtr = nullptr, * bPtr = nullptr, * cPtr = nullptr;
-				auto aSIZE = a->getRows() * a->getCols(), bSIZE = b.getRows() * b.getCols(), cSIZE = a->getRows() * b.getCols();
+				auto aSIZE = a->getRows() * a->getCols();
+				auto bSIZE = b.getRows() * b.getCols(); 
+				auto cSIZE = a->getRows() * b.getCols();
 
-				std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
-
-				cudaMalloc(&aPtr, sizeof(float) * (static_cast<size_t>(aSIZE) + bSIZE + cSIZE));
-				bPtr = aPtr + bSIZE;
-				cPtr = aPtr + cSIZE;
+				cudaMalloc(&aPtr, sizeof(float) * aSIZE);
+				cudaMalloc(&bPtr, sizeof(float) * bSIZE);
+				cudaMalloc(&cPtr, sizeof(float) * cSIZE);
+				//bPtr = aPtr + aSIZE;
+				//cPtr = aPtr + aSIZE + bSIZE;
 
 				cudaMemset(cPtr, 0, sizeof(float) * cSIZE);
 
@@ -327,11 +327,7 @@ namespace YuiOkusora
 				a->unload(viewA.lpMapAddress);
 				b.unload(viewB.lpMapAddress);
 
-				std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
-
-				std::cout << std::chrono::duration<long long, std::nano>(end - start).count() << "\n";
-
-				dim3 blockNum(0,0,1), threadNum(0,0,1);
+				dim3 blockNum(1,1,1), threadNum(1,1,1);
 
 				for (unsigned i = 1; i <= 16; i = i << 2)
 				{
@@ -354,9 +350,6 @@ namespace YuiOkusora
 					threadNum.x = (unsigned)ceil(tmp);
 					if (blockNum.x <= 26) break;
 				}
-
-				//threadNum.y = 1024 / threadNum.x;
-				//blockNum.y = (unsigned)ceil(float(b.getCols()) / float(threadNum.y));
 
 				YuiOkusora::Cuda::Matrix::__cudaDotProductMatrix<<<blockNum, threadNum>>>(aPtr, bPtr, cPtr, a->getRows(), a->getCols(), b.getCols());
 

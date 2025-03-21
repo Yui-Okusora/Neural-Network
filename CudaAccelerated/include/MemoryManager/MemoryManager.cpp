@@ -89,6 +89,7 @@ void MemoryManager::memcopy(AdvancedMemory* _dst, AdvancedMemory* _src, const sh
 	}
 
 	_dst->unloadAll();
+	_src->unloadAll();
 
 	CHAR lpDstFileName[MAX_PATH] = "";
 	CHAR lpSrcFileName[MAX_PATH] = "";
@@ -97,9 +98,14 @@ void MemoryManager::memcopy(AdvancedMemory* _dst, AdvancedMemory* _src, const sh
 	GetFinalPathNameByHandle(_src->hFile, lpSrcFileName, MAX_PATH, FILE_NAME_NORMALIZED);
 
 	_dst->closeAllPtr();
+	_src->closeAllPtr();
+	//DeleteFile(lpDstFileName);
 	CopyFile(lpSrcFileName, lpDstFileName, false);
-	_dst->hFile = CreateFile(lpDstFileName, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	_dst->hFile = CreateFile(lpDstFileName, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	_src->hFile = CreateFile(lpSrcFileName, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	_dst->dwFileSize = GetFileSize(_dst->hFile, NULL);
 	_dst->createMapObj();
+	_src->createMapObj();
 }
 
 void MemoryManager::copyThreadsRawPtr(AdvancedMemory* _dst, void* _src, size_t offset, size_t _size)

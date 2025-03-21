@@ -39,14 +39,13 @@ void AdvancedMemory::resize(const size_t& fileSize)
 	LONG dwHigh32bSize = fileSize >> 32, dwLow32bSize = fileSize & 0xFFFFFFFF;
 	SetFilePointer(hFile, dwLow32bSize, &dwHigh32bSize, FILE_BEGIN);
 	SetEndOfFile(hFile);
-
+	dwFileSize = GetFileSize(hFile, NULL);
 	createMapObj();
 }
 
 void AdvancedMemory::createMapObj()
 {
-	hMapFile = CreateFileMapping(hFile, NULL, 0, 0, 0, NULL);
-	dwFileSize = GetFileSize(hFile, NULL);
+	hMapFile = CreateFileMapping(hFile, NULL, PAGE_READWRITE, 0, 0, NULL);
 }
 
 void AdvancedMemory::unload(LPVOID viewAddress)
@@ -72,8 +71,14 @@ void AdvancedMemory::unloadAll()
 void AdvancedMemory::closeAllPtr()
 {	
 	unloadAll();
-	if (hMapFile != NULL) CloseHandle(hMapFile);
-	if (hFile != NULL) CloseHandle(hFile);
+	if (hMapFile != NULL){
+		CloseHandle(hMapFile);
+		hMapFile = NULL;
+	}
+	if (hFile != NULL) {
+		CloseHandle(hFile);
+		hFile = NULL;
+	}
 }
 
 AdvancedMemory::~AdvancedMemory()
