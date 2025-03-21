@@ -87,30 +87,19 @@ void MemoryManager::memcopy(AdvancedMemory* _dst, AdvancedMemory* _src, const sh
 	if (_dst->getFileSize() != _size) {
 		_dst->resize(_src->getFileSize());
 	}
-	const size_t chunkSize = floor(_size / 4.0);//MemMng.getSysGranularity() * 1024 * 10;
-	size_t remainingData = _size;
-	const int numThreads = (int)ceil(_size / (double)chunkSize);
-	std::vector<std::thread> threads;
-	for (int i = 0; i < numThreads; ++i)
-	{
-		size_t chunkCpy = min(chunkSize, remainingData);
-		threads.push_back(std::thread(&MemoryManager::copyThreads, this, _dst, _src, chunkSize * i, chunkCpy));
-		remainingData -= chunkCpy;
-	}
-	for (auto& a : threads)
-		if (a.joinable())
-			a.join();
-	_dst->unloadAll();
-	_src->unloadAll();
-}
 
-void MemoryManager::copyThreads(AdvancedMemory* _dst, AdvancedMemory* _src, size_t offset, size_t _size)
-{
-	ViewOfAdvancedMemory& dstView = _dst->load(offset, _size);
-	ViewOfAdvancedMemory& srcView = _src->load(offset, _size);
-	memcpy(_dst->getViewPtr(dstView), _src->getViewPtr(srcView), _size);
-	_dst->unload(dstView.lpMapAddress);
-	_src->unload(srcView.lpMapAddress);
+	_dst->unloadAll();
+
+	CHAR lpDstFileName[MAX_PATH] = "";
+	CHAR lpSrcFileName[MAX_PATH] = "";
+
+	GetFinalPathNameByHandle(_dst->hFile, lpDstFileName, MAX_PATH, FILE_NAME_NORMALIZED);
+	GetFinalPathNameByHandle(_src->hFile, lpSrcFileName, MAX_PATH, FILE_NAME_NORMALIZED);
+
+	_dst->closeAllPtr();
+	CopyFile(lpSrcFileName, lpDstFileName, false);
+	_dst->hFile = CreateFile(lpDstFileName, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	_dst->createMapObj();
 }
 
 void MemoryManager::copyThreadsRawPtr(AdvancedMemory* _dst, void* _src, size_t offset, size_t _size)

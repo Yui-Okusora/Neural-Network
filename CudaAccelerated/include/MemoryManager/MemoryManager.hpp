@@ -22,7 +22,6 @@ public:
 	unsigned long long& getUsedMemory() { return usedMem; }
 private:
 	MemoryManager() {};
-	void copyThreads(AdvancedMemory* _dst, AdvancedMemory* _src, size_t offset, size_t _size);
 	void copyThreadsRawPtr(AdvancedMemory* _dst, void* _src, size_t offset, size_t _size);
 	unsigned long long usedMem = 0;
 	unsigned n_FileCreated = 0;

@@ -21,12 +21,6 @@ int main()
 
 	MemMng.createTmp(&adMem1, sizeof(unsigned int) * SIZE);
 	MemMng.createTmp(&adMem2, sizeof(unsigned int) * SIZE);
-	//adMem1.load(0, sizeof(unsigned int) * SIZE);
-	//adMem2.load(0, sizeof(unsigned int) * SIZE);
-	//adMem2.load(0, sizeof(float) * SIZE * SIZE1);
-	
-	//float* arrayA = nullptr;
-	//arrayA = (float*)malloc(sizeof(float) * SIZE);
 
 	for (unsigned long long i = 0; i < 1000; ++i) {
 		ViewOfAdvancedMemory& view = adMem1.load(sizeof(unsigned int) * (SIZE / 1000) * i, sizeof(unsigned int) * (SIZE / 1000));
@@ -133,20 +127,6 @@ int main()
 		adMem1.unload(view1.lpMapAddress);
 		adMem2.unload(view2.lpMapAddress);
 	}
-	
-	for (unsigned long long i = 0; i < SIZE; ++i)
-	{
-		//std::cout << adMem2.at<float>(i) << "\n";
-		break;
-		
-	}
-
-	//free(arrayA);
-
-	//system("pause");
-
-	/*free(arrayA);
-	free(arrayB);*/
 	
 	resetGPU();
 	return 0;
