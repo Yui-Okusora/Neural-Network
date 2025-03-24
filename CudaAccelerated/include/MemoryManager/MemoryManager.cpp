@@ -22,13 +22,32 @@ void MemoryManager::initManager()
 	dwSysGran = SysInfo.dwAllocationGranularity;
 }
 
+void MemoryManager::setTmpDir(char* dir)
+{
+	tmpDir = dir;
+}
+
 void MemoryManager::createTmp(AdvancedMemory *memPtr, const size_t &fileSize)
 {
 	AdvancedMemory &tmp = *memPtr;
-	char str[50] = "";
-	_itoa_s(fileID, str, 10);
-	strcat_s(str, ".tmpbin");
-	LPCSTR lpcTheFile = str;
+
+	char id[50] = "";
+
+	if (inactiveFileID.empty())
+	{
+		_itoa_s(fileID, id, 10);
+		tmp.fileID = fileID;
+		++fileID;
+	}
+	else {
+		unsigned long tmpID = inactiveFileID.front();
+		_itoa_s(tmpID, id, 10);
+		tmp.fileID = tmpID;
+		inactiveFileID.pop();
+	}
+		
+	strcat_s(id, ".tmpbin");
+	LPCSTR lpcTheFile = id;
 	
 	tmp.hFile = CreateFile(lpcTheFile, GENERIC_READ | GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	
@@ -38,25 +57,20 @@ void MemoryManager::createTmp(AdvancedMemory *memPtr, const size_t &fileSize)
 		printf(TEXT("Target file is %s\n"),
 			lpcTheFile);
 	}
-	CHAR lpBuff[MAX_PATH] = "";
+	//CHAR lpBuff[MAX_PATH] = "";
 
-	GetFullPathName(lpcTheFile, MAX_PATH, lpBuff, NULL);
+	//GetFullPathName(lpcTheFile, MAX_PATH, lpBuff, NULL);
 
-	printf("\n");
-	printf(lpBuff);
-	printf("\n");
+	//printf("\n");
+	//printf(lpBuff);
+	//printf("\n");
 
-	DWORD dwHigh32bSize = fileSize >> 32, dwLow32bSize = fileSize & 0xFFFFFFFF;
-	if (tmp.hMapFile != NULL) CloseHandle(tmp.hMapFile);
-	tmp.hMapFile = CreateFileMapping(tmp.hFile, NULL, PAGE_READWRITE, dwHigh32bSize, dwLow32bSize, NULL);
-	tmp.dwFileSize = GetFileSize(tmp.hFile, NULL);
-	++fileID;
+	tmp.resize(fileSize);
 }
 
-AdvancedMemory MemoryManager::createPmnt()
+void MemoryManager::createPmnt(AdvancedMemory* memPtr, const size_t& fileSize)
 {
-	AdvancedMemory tmp;
-	return tmp;
+	AdvancedMemory& tmp = *memPtr;
 }
 
 void MemoryManager::memcopy(AdvancedMemory* _dst, void* _src, const size_t& _size)
@@ -78,15 +92,13 @@ void MemoryManager::memcopy(AdvancedMemory* _dst, void* _src, const size_t& _siz
 	for (auto& a : threads)
 		if (a.joinable())
 			a.join();
-	_dst->unloadAll();
+	//_dst->unloadAll();
 }
 
 void MemoryManager::memcopy(AdvancedMemory* _dst, AdvancedMemory* _src, const short& _typeSize, const size_t& _size)
 {
-	if (_dst->hFile == NULL) MemMng.createTmp(_dst, _size);
-	if (_dst->getFileSize() != _size) {
-		_dst->resize(_src->getFileSize());
-	}
+	if (_dst->hFile == NULL) 
+		MemMng.createTmp(_dst, _size);
 
 	_dst->unloadAll();
 	_src->unloadAll();
@@ -99,7 +111,6 @@ void MemoryManager::memcopy(AdvancedMemory* _dst, AdvancedMemory* _src, const sh
 
 	_dst->closeAllPtr();
 	_src->closeAllPtr();
-	//DeleteFile(lpDstFileName);
 	CopyFile(lpSrcFileName, lpDstFileName, false);
 	_dst->hFile = CreateFile(lpDstFileName, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	_src->hFile = CreateFile(lpSrcFileName, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
@@ -112,7 +123,7 @@ void MemoryManager::copyThreadsRawPtr(AdvancedMemory* _dst, void* _src, size_t o
 {
 	ViewOfAdvancedMemory& dstView = _dst->load(offset, _size);
 	memcpy(_dst->getViewPtr(dstView), (char*)_src + offset, _size);
-	_dst->unload(dstView.lpMapAddress);
+	_dst->unload(dstView);
 }
 
 void MemoryManager::move(AdvancedMemory* _dst, AdvancedMemory* _src)

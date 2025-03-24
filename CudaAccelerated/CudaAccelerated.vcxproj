@@ -93,15 +93,19 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\AdvancedMemory\AdvancedMemory.hpp" />
-    <ClInclude Include="include\FullyConnLayer.hpp" />
+    <ClInclude Include="include\Layer\FullyConnLayer\FullyConnLayer.hpp" />
     <ClInclude Include="include\HeaderLibs.hpp" />
+    <ClInclude Include="include\Layer\Layer.hpp" />
     <ClInclude Include="include\Matrix\Matrix.hpp" />
     <ClInclude Include="include\MemoryManager\MemoryManager.hpp" />
+    <ClInclude Include="include\Net\Net.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="include\AdvancedMemory\AdvancedMemory.cpp" />
+    <ClCompile Include="include\Layer\FullyConnLayer\FullyConnLayer.cpp" />
     <ClCompile Include="include\Matrix\Matrix.cpp" />
     <ClCompile Include="include\MemoryManager\MemoryManager.cpp" />
+    <ClCompile Include="include\Net\Net.cpp" />
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

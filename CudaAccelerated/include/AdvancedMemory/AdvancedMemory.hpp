@@ -16,13 +16,14 @@ public:
 	friend class MemoryManager;
 
 	ViewOfAdvancedMemory& load(size_t offset, size_t size); // offset and size in bytes
-	void unload(LPVOID viewAddress);
+	void unload(ViewOfAdvancedMemory& view);
 	void unloadAll();
 	void resize(const size_t& fileSize); // in bytes
 	void createMapObj();
 	//LPVOID getMapPtr() const { return lpMapAddress; }
 	void* getViewPtr(const ViewOfAdvancedMemory& view) const { return (char*)view.lpMapAddress + view.iViewDelta; }
 	DWORD getFileSize() const { return dwFileSize; }
+	unsigned long getID() const { return fileID; }
 	//DWORD getViewSize() const { return dwMapViewSize; }
 	template<typename T> T& at(const size_t& index, const ViewOfAdvancedMemory &view) // recommended using
 	{
@@ -35,7 +36,7 @@ private:
 	HANDLE hMapFile = NULL;      // handle for the file's memory-mapped region
 	HANDLE hFile = NULL;         // the file handle
 	DWORD dwFileSize = 0;     // temporary storage for file sizes  
-	unsigned long usedMem = 0;
+	unsigned long fileID = 0;
 	std::unordered_map<LPVOID, ViewOfAdvancedMemory> views;
 };
 

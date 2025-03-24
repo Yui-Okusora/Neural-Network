@@ -21,11 +21,13 @@
     <ClInclude Include="include\HeaderLibs.hpp">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\FullyConnLayer.hpp">
+    <ClInclude Include="include\Layer\FullyConnLayer\FullyConnLayer.hpp">
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="include\MemoryManager\MemoryManager.hpp" />
     <ClInclude Include="include\AdvancedMemory\AdvancedMemory.hpp" />
+    <ClInclude Include="include\Net\Net.hpp" />
+    <ClInclude Include="include\Layer\Layer.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="include\Matrix\Matrix.cpp">
@@ -34,5 +36,7 @@
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="include\MemoryManager\MemoryManager.cpp" />
     <ClCompile Include="include\AdvancedMemory\AdvancedMemory.cpp" />
+    <ClCompile Include="include\Layer\FullyConnLayer\FullyConnLayer.cpp" />
+    <ClCompile Include="include\Net\Net.cpp" />
   </ItemGroup>
 </Project>

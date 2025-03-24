@@ -40,14 +40,16 @@ Matrix::Matrix(unsigned rows, unsigned cols)
 
 Matrix::~Matrix()
 {
+    //std::cout << "Matrix destroyed " << m_values.getID() << "\n";
     //m_values.~AdvancedMemory();
 }
 
-void Matrix::operator=(Matrix& b)
+Matrix& Matrix::operator=(Matrix& b)
 {
     n_rows = b.getRows();
     n_columns = b.getCols();
     MemMng.memcopy(&m_values, &b.m_values, sizeof(float), sizeof(float) * n_rows * n_columns);
+    return *this;
 }
 
 float& Matrix::getValue(unsigned row, unsigned col, const ViewOfAdvancedMemory& view)
@@ -65,9 +67,9 @@ ViewOfAdvancedMemory& Matrix::load(size_t offset, size_t size)
     return m_values.load(offset, size);
 }
 
-void Matrix::unload(LPVOID viewAddress)
+void Matrix::unload(ViewOfAdvancedMemory& view)
 {
-    m_values.unload(viewAddress);
+    m_values.unload(view);
 }
 
 Matrix Matrix::setRandomVals(float randVal(void))
@@ -78,7 +80,7 @@ Matrix Matrix::setRandomVals(float randVal(void))
     {
         m_values.at<float>(i, view) = randVal();
     }
-    m_values.unload(view.lpMapAddress);
+    m_values.unload(view);
     return *this;
 }
 
@@ -88,69 +90,138 @@ Matrix Matrix::fill(const float& x)
     return *this;
 }
 
+Matrix& Matrix::add_nocopy(Matrix& b)
+{
+    if (n_rows != b.getRows() || n_columns != b.getCols())
+        throw std::out_of_range("Adding matrixes are not the same dimensions\n");
+    YuiOkusora::Math::Mat::addMatrix(this, b);
+    return *this;
+}
+
 Matrix Matrix::add(Matrix& b)
 {
     Matrix tmp(*this);
-    if (n_rows != b.getRows() || n_columns != b.getCols())
-        throw std::out_of_range("Adding matrixes are not the same dimensions\n");
-    YuiOkusora::Math::Mat::addMatrix(&tmp, b);
+    tmp.add_nocopy(b);
     return tmp;
+}
+
+Matrix& Matrix::add_nocopy(const float& b)
+{
+    YuiOkusora::Math::Mat::addVal2Matrix(this, b);
+    return *this;
 }
 
 Matrix Matrix::add(const float& b)
 {
     Matrix tmp(*this);
-    YuiOkusora::Math::Mat::addVal2Matrix(&tmp, b);
+    tmp.add_nocopy(b);
     return tmp;
+}
+
+Matrix& Matrix::subtr_nocopy(Matrix& b)
+{
+    if (n_rows != b.getRows() || n_columns != b.getCols())
+        throw std::out_of_range("Subtracting matrixes are not the same dimensions\n");
+    YuiOkusora::Math::Mat::subtractMatrix(this, b);
+    return *this;
 }
 
 Matrix Matrix::subtr(Matrix& b)
 {
     Matrix tmp(*this);
-    if (n_rows != b.getRows() || n_columns != b.getCols())
-        throw std::out_of_range("Subtracting matrixes are not the same dimensions\n");
-    YuiOkusora::Math::Mat::subtractMatrix(&tmp, b);
+    tmp.subtr_nocopy(b);
     return tmp;
+}
+
+Matrix& Matrix::transpose_nocopy()
+{
+    YuiOkusora::Math::Mat::transposeMatrix(this);
+
+    unsigned tmp1 = getCols();
+    setCols(getRows());
+    setRows(tmp1);
+
+    return *this;
 }
 
 Matrix Matrix::transpose()
 {
     Matrix tmp(*this);
-    
-    YuiOkusora::Math::Mat::transposeMatrix(&tmp);
-
-    unsigned tmp1 = tmp.getCols();
-    tmp.setCols(tmp.getRows());
-    tmp.setRows(tmp1);
-
+    tmp.transpose_nocopy();
     return tmp;
+}
+
+Matrix& Matrix::multiply_nocopy(float x)
+{
+    YuiOkusora::Math::Mat::multiplyVal2Matrix(this, x);
+    return *this;
 }
 
 Matrix Matrix::multiply(float x)
 {
     Matrix tmp(*this);
-    YuiOkusora::Math::Mat::multiplyVal2Matrix(&tmp, x);
+    tmp.multiply_nocopy(x);
     return tmp;
+}
+
+Matrix& Matrix::multiply_nocopy(Matrix& b)
+{
+    if (n_rows != b.getRows() || n_columns != b.getCols())
+        throw std::out_of_range("Scaling matrixes are not the same dimensions\n");
+    YuiOkusora::Math::Mat::multiplyMat2Matrix(this, b);
+    return *this;
 }
 
 Matrix Matrix::multiply(Matrix& b)
 {
     Matrix tmp(*this);
-    if (n_rows != b.getRows() || n_columns != b.getCols())
-        throw std::out_of_range("Scaling matrixes are not the same dimensions\n");
-    YuiOkusora::Math::Mat::multiplyMat2Matrix(&tmp, b);
+    tmp.multiply_nocopy(b);
     return tmp;
+}
+
+Matrix& Matrix::dotProduct_nocopy(Matrix& b)
+{
+    if (n_columns != b.getRows())
+        throw std::out_of_range("Multipling matrix A columns not equal matrix B rows\n");
+    YuiOkusora::Math::Mat::dotProductMatrix(this, b);
+    setCols(b.getCols());
+
+    return *this;
 }
 
 Matrix Matrix::dotProduct(Matrix& b)
 {
-    
     Matrix tmp(*this);
-    if (n_columns != b.getRows())
-        throw std::out_of_range("Multipling matrix A columns not equal matrix B rows\n");
-    YuiOkusora::Math::Mat::dotProductMatrix(&tmp, b);
-    tmp.setCols(b.getRows());
+    tmp.dotProduct_nocopy(b);
+    return tmp;
+}
 
+Matrix& Matrix::applyActivation_nocopy(ActivationType activation, float reluParam)
+{
+    YuiOkusora::Math::Mat::applyActivationMatrix(this, activation, reluParam);
+    return *this;
+}
+
+Matrix Matrix::applyActivation(ActivationType activation, float reluParam)
+{
+    Matrix tmp(*this);
+    tmp.applyActivation(activation, reluParam);
+    return tmp;
+}
+
+Matrix& Matrix::applyActivationDerivative_nocopy(ActivationType activation, Matrix* scalar, float reluParam)
+{
+    if (scalar != NULL)
+        if (n_rows != scalar->getRows() || n_columns != scalar->getCols())
+            throw std::out_of_range("Matrixes are not the same dimensions\n");
+    YuiOkusora::Math::Mat::applyActivationDerivativeMatrix(this, activation, reluParam, scalar);
+    return *this;
+}
+
+Matrix Matrix::applyActivationDerivative(ActivationType activation, Matrix* scalar, float reluParam)
+{
+    Matrix tmp(*this);
+    tmp.applyActivationDerivative_nocopy(activation, scalar, reluParam);
     return tmp;
 }
 
@@ -170,7 +241,7 @@ float Matrix::sum()
     {
         sum += m_values.at<float>(i, view);
     }
-    m_values.unload(view.lpMapAddress);
+    m_values.unload(view);
     return sum;
 }
 
@@ -183,7 +254,7 @@ void Matrix::print()
             std::cout << std::setw(3) << getValue(i,j, view) << " ";
         std::cout << "\n";
     }
-    m_values.unload(view.lpMapAddress);
+    m_values.unload(view);
 }
 
 void Matrix::read(std::ifstream& f)
@@ -195,7 +266,7 @@ void Matrix::read(std::ifstream& f)
     {
         f >> m_values.at<float>(i, view);
     }
-    m_values.unload(view.lpMapAddress);
+    m_values.unload(view);
 }
 
 void Matrix::printFlat(std::ofstream& f)
@@ -205,7 +276,7 @@ void Matrix::printFlat(std::ofstream& f)
     for (unsigned i = 0; i < n_rows * n_columns; ++i)
         f << m_values.at<float>(i, view) << " ";
     f << "\n";
-    m_values.unload(view.lpMapAddress);
+    m_values.unload(view);
 }
 
 std::ostream& operator<<(std::ostream& out, Matrix& a)

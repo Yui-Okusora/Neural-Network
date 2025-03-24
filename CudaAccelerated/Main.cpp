@@ -1,4 +1,6 @@
 #include "include/Matrix/Matrix.hpp"
+#include "include/Net/Net.hpp"
+#include "include/Layer/FullyConnLayer/FullyConnLayer.hpp"
 //#include "include/MemoryManager/MemoryManager.hpp"
 //#include "include/AdvancedMemory/AdvancedMemory.hpp"
 #include "iostream"
@@ -15,28 +17,61 @@ int main()
 	loadMem();
 	MemMng.initManager();
 
-	float a[] = {1,0,1,2,1,1,0,1,1,1,1,2};
-	float b[] = {1,2,1,2,3,1,4,2,2};
+	srand(time(0));
 
-	Matrix A(a, 4, 3);
-	Matrix B(b, 3, 3);
-	Matrix C;
+	Net net1;
 
-	std::cout << A << "\n" << B << "\n";
-	
 	std::chrono::high_resolution_clock::time_point start, end;
-	start = std::chrono::high_resolution_clock::now();
 
-	C = A.dotProduct(B);
+	net1.layers.push_back(new FullyConnLayer(2,3, ActivationType::Tanh));
+	net1.layers.push_back(new FullyConnLayer(3,3, ActivationType::Tanh));
+	//net1.layers.push_back(new FullyConnLayer(3,3, ActivationType::Tanh));
+	net1.layers.push_back(new FullyConnLayer(3,1, ActivationType::Tanh));
 
-	end = std::chrono::high_resolution_clock::now();
+	Matrix input(1, 2),target(1, 1);
 
-	C.print();
-	std::cout << "\n";
+	for (int i = 1; i <= 200; ++i)
+	{
+		int randomVal1 = (rand() % 10 + 1) / 10;
+		int randomVal2 = (rand() % 10 + 1) / 10;
+		int trueAns = randomVal1 ^ randomVal2;
+		ViewOfAdvancedMemory& viewInput = input.load(0, sizeof(float) * input.getCols());
+		input.getValue(0, 0, viewInput) = randomVal1;
+		input.getValue(0, 1, viewInput) = randomVal2;
+		input.unload(viewInput);
 
-	std::cout << "Speed: " << std::chrono::duration<long double, std::micro>(end - start).count() << "\n";
+		ViewOfAdvancedMemory& viewTarget = target.load(0, sizeof(float) * target.getCols());
+		target.getValue(0, 0, viewTarget) = trueAns;
+		//target.getValue(0, 1, viewTarget) = !trueAns;
+		target.unload(viewTarget);
+
+		net1.m_inputVals = input;
+
+		start = std::chrono::high_resolution_clock::now();
+
+		net1.feedforward();
+		net1.calcError(target);
+
+		net1.backpropagation(0.027f);
+
+		end = std::chrono::high_resolution_clock::now();
+
+		std::cout << "Completed after " << std::chrono::duration<long double, std::micro>(end - start).count() << "us\n";
+
+		if (i % 10 == 0) {
+			std::cout << "\nEpoch: " << i << "\nInput:\n";
+			input.print();
+			std::cout << "\nTarget:\n";
+			target.print();
+			std::cout << "\nOutput:\n";
+			net1.m_outputVals.print();
+			std::cout << "\nError: ";
+			std::cout << net1.m_recentAverageError << std::endl;
+		}
+	}
 
 	resetGPU();
+	system("pause");
 	return 0;
 }
 

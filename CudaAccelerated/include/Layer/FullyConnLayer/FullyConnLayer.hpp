@@ -1,0 +1,28 @@
+#pragma once
+#include "Matrix/Matrix.hpp"
+#include "Layer/Layer.hpp"
+#include <memory>
+
+class FullyConnLayer : public Layer
+{
+public:
+    FullyConnLayer(unsigned inpNeuronNum, unsigned neuronNum, ActivationType activation);
+    FullyConnLayer();
+    void feedforward(Matrix& input, Matrix& output);
+    void backpropagate(Matrix& inputGradient, Matrix& outputGradient);
+private:
+    void createWeights(unsigned inpSize);
+    float activationFunction(float x);
+    float activationFunctionDerivative(float x);
+    static double randomWeight(void) { return rand() / double(RAND_MAX)/ 1.0; }
+    float sumE_z = 0.0;
+    float maxC = -9999999;
+    std::unique_ptr<Matrix> m_output;
+    std::unique_ptr<Matrix> m_input;
+    std::unique_ptr<Matrix> weights;
+    std::unique_ptr<Matrix> bias;
+    std::unique_ptr<Matrix> old_weightsDelta;
+    std::unique_ptr<Matrix> old_biasDelta;
+    ActivationType activationType = ActivationType::Sigmoid;
+};
+

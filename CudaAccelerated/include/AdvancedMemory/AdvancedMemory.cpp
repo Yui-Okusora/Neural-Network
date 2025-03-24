@@ -5,7 +5,10 @@
 ViewOfAdvancedMemory& AdvancedMemory::load(size_t offset, size_t size)
 {
 	ViewOfAdvancedMemory view;
-	if (hMapFile == NULL) resize(size);
+	if (hFile == NULL)
+		system("pause");
+	if (hMapFile == NULL) 
+		resize(size);
 	if (offset >= dwFileSize) return view;
 	if (offset + size >= dwFileSize) size = dwFileSize - offset;
 
@@ -16,14 +19,12 @@ ViewOfAdvancedMemory& AdvancedMemory::load(size_t offset, size_t size)
 	view.dwMapViewSize = (offset % MemMng.getSysGranularity()) + size;
 	view.iViewDelta = offset - dwFileMapStart;
 
-	DWORD dwHighFileMapStart = ((size_t)dwFileMapStart >> 32);
+	DWORD dwHighFileMapStart = (dwFileMapStart >> 32);
 	dwFileMapStart &= 0xFFFFFFFF;
 
     view.lpMapAddress = MapViewOfFile(hMapFile,FILE_MAP_ALL_ACCESS, dwHighFileMapStart, dwFileMapStart, view.dwMapViewSize);
 	
-	if (view.lpMapAddress == NULL) return view;
-
-	usedMem += view.dwMapViewSize;
+	if (view.lpMapAddress == NULL) throw std::bad_alloc();//return view;
 
 	MemMng.getUsedMemory() += view.dwMapViewSize;
 
@@ -35,7 +36,8 @@ ViewOfAdvancedMemory& AdvancedMemory::load(size_t offset, size_t size)
 void AdvancedMemory::resize(const size_t& fileSize)
 {
 	unloadAll();
-	CloseHandle(hMapFile);
+	if (hMapFile != NULL) 
+		CloseHandle(hMapFile);
 	LONG dwHigh32bSize = fileSize >> 32, dwLow32bSize = fileSize & 0xFFFFFFFF;
 	SetFilePointer(hFile, dwLow32bSize, &dwHigh32bSize, FILE_BEGIN);
 	SetEndOfFile(hFile);
@@ -48,24 +50,24 @@ void AdvancedMemory::createMapObj()
 	hMapFile = CreateFileMapping(hFile, NULL, PAGE_READWRITE, 0, 0, NULL);
 }
 
-void AdvancedMemory::unload(LPVOID viewAddress)
+void AdvancedMemory::unload(ViewOfAdvancedMemory& view)
 {
-	ViewOfAdvancedMemory &view = views.at(viewAddress);
+	if (views.count(view.lpMapAddress) == 0) return;
 	MemMng.getUsedMemory() -= view.dwMapViewSize;
 	view.dwMapViewSize = 0;
 	view.iViewDelta = 0;
 	view._offset = 0;
 	
-	UnmapViewOfFile(viewAddress);
+	UnmapViewOfFile(view.lpMapAddress);
 	view.lpMapAddress = NULL;
-	views.erase(viewAddress);
+	views.erase(view.lpMapAddress);
 }
 
 void AdvancedMemory::unloadAll()
 {
 	if (views.empty()) return;
 	for (auto &view : views)
-		unload(view.first);
+		unload(view.second);
 }
 
 void AdvancedMemory::closeAllPtr()
@@ -84,5 +86,8 @@ void AdvancedMemory::closeAllPtr()
 AdvancedMemory::~AdvancedMemory()
 {
 	closeAllPtr();
+	MemMng.addTmpInactive(fileID);
+	dwFileSize = 0;
+	fileID = 0;
 }
 
