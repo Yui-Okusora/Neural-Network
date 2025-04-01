@@ -1,4 +1,4 @@
-# Neural Network
+# NeuroSora
 
 This is a MLP framework made from scratch in C/C++ by [Yui Okusora](https://github.com/Yui-Okusora).
 
@@ -43,4 +43,4 @@ These are modules that make up this framework.
   - NVIDIA CUDA Toolkit
 
 ## License 
-- Currently none
+- According to Apache 2.0 License
