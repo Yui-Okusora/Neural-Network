@@ -1,8 +1,6 @@
 #include "include/Matrix/Matrix.hpp"
 #include "include/Net/Net.hpp"
 #include "include/Layer/FullyConnLayer/FullyConnLayer.hpp"
-//#include "include/MemoryManager/MemoryManager.hpp"
-//#include "include/AdvancedMemory/AdvancedMemory.hpp"
 #include "iostream"
 #include <chrono>
 
@@ -16,8 +14,9 @@ int main()
 {
 	loadMem();
 	MemMng.initManager();
+	MemMng.setTmpDir("tmp\\");
 
-	srand(time(0));
+	srand((unsigned int)time(0));
 
 	Net net1;
 
@@ -25,23 +24,23 @@ int main()
 
 	net1.layers.push_back(new FullyConnLayer(2,3, ActivationType::Tanh));
 	net1.layers.push_back(new FullyConnLayer(3,3, ActivationType::Tanh));
-	//net1.layers.push_back(new FullyConnLayer(3,3, ActivationType::Tanh));
+	net1.layers.push_back(new FullyConnLayer(3,3, ActivationType::Tanh));
 	net1.layers.push_back(new FullyConnLayer(3,1, ActivationType::Tanh));
 
 	Matrix input(1, 2),target(1, 1);
 
-	for (int i = 1; i <= 200; ++i)
+	for (int i = 1; i <= 20; ++i)
 	{
 		int randomVal1 = (rand() % 10 + 1) / 10;
 		int randomVal2 = (rand() % 10 + 1) / 10;
 		int trueAns = randomVal1 ^ randomVal2;
 		ViewOfAdvancedMemory& viewInput = input.load(0, sizeof(float) * input.getCols());
-		input.getValue(0, 0, viewInput) = randomVal1;
-		input.getValue(0, 1, viewInput) = randomVal2;
+		input.getValue(0, 0, viewInput) = (float)randomVal1;
+		input.getValue(0, 1, viewInput) = (float)randomVal2;
 		input.unload(viewInput);
 
 		ViewOfAdvancedMemory& viewTarget = target.load(0, sizeof(float) * target.getCols());
-		target.getValue(0, 0, viewTarget) = trueAns;
+		target.getValue(0, 0, viewTarget) = (float)trueAns;
 		//target.getValue(0, 1, viewTarget) = !trueAns;
 		target.unload(viewTarget);
 

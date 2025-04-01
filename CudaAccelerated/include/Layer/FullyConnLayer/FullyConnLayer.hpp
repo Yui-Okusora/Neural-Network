@@ -14,7 +14,7 @@ private:
     void createWeights(unsigned inpSize);
     float activationFunction(float x);
     float activationFunctionDerivative(float x);
-    static double randomWeight(void) { return rand() / double(RAND_MAX)/ 1.0; }
+    static float randomWeight(void) { return rand() / float(RAND_MAX); }
     float sumE_z = 0.0;
     float maxC = -9999999;
     std::unique_ptr<Matrix> m_output;

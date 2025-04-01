@@ -49,8 +49,8 @@ void Net::feedforward()
 void Net::backpropagation(float learning_rate)
 {
     Layer::eta = learning_rate;
-    for (int i = layers.size() - 1; i >= 0;--i)
+    for (size_t i = layers.size(); i > 0;--i)
     {
-        layers[i]->backpropagate(m_gradients, m_gradients);
+        layers[i - 1]->backpropagate(m_gradients, m_gradients);
     }
 }

@@ -28,6 +28,8 @@
     <ClInclude Include="include\AdvancedMemory\AdvancedMemory.hpp" />
     <ClInclude Include="include\Net\Net.hpp" />
     <ClInclude Include="include\Layer\Layer.hpp" />
+    <ClInclude Include="include\Timer.hpp" />
+    <ClInclude Include="include\ThreadPool\ThreadPool.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="include\Matrix\Matrix.cpp">
@@ -38,5 +40,6 @@
     <ClCompile Include="include\AdvancedMemory\AdvancedMemory.cpp" />
     <ClCompile Include="include\Layer\FullyConnLayer\FullyConnLayer.cpp" />
     <ClCompile Include="include\Net\Net.cpp" />
+    <ClCompile Include="include\ThreadPool\ThreadPool.cpp" />
   </ItemGroup>
 </Project>

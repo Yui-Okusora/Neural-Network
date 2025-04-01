@@ -21,13 +21,13 @@ namespace YuiOkusora
 					return 1.0f / (1.0f + expf(-x));
 					break;
 				case ActivationType::ReLU:
-					return max(0.0, x);
+					return max(0.0f, x);
 					break;
 				case ActivationType::LReLU:
-					return (x > 0.0) ? x : reluParam * x;
+					return (x > 0.0f) ? x : reluParam * x;
 					break;
 				default:
-					return 0.0;
+					return 0.0f;
 					break;
 				}
 			}
@@ -37,18 +37,18 @@ namespace YuiOkusora
 				switch (activationType)
 				{
 				case ActivationType::Tanh:
-					return 1.0 - x * x;
+					return 1.0f - x * x;
 					break;
 				case ActivationType::Sigmoid:
-					return x * (1.0 - x);
+					return x * (1.0f - x);
 					break;
 				case ActivationType::ReLU:
-					return (x > 0.0) ? 1.0 : 0.0;
+					return (x > 0.0f) ? 1.0f : 0.0f;
 					break;
 				case ActivationType::LReLU:
-					return (x > 0.0) ? 1.0 : reluParam;
+					return (x > 0.0f) ? 1.0f : reluParam;
 				default:
-					return 0.0;
+					return 0.0f;
 					break;
 				}
 			}
@@ -192,7 +192,7 @@ namespace YuiOkusora
 				unsigned blockNum = 1, threadsPerBlock = 0;
 				for (int i = 0; i <= 5; ++i) {
 					threadsPerBlock = 32 << i;
-					blockNum = ceil(float(a->getCols() * a->getRows()) / float(threadsPerBlock * 2));
+					blockNum = static_cast<unsigned>(ceil(float(a->getCols() * a->getRows()) / float(threadsPerBlock * 2)));
 					if (blockNum <= 208) break;
 				}
 
@@ -222,7 +222,7 @@ namespace YuiOkusora
 				unsigned blockNum = 1, threadsPerBlock = 0;
 				for (int i = 0; i <= 5; ++i) {
 					threadsPerBlock = 32 << i;
-					blockNum = ceil(float(a->getCols() * a->getRows()) / float(threadsPerBlock * 2));
+					blockNum = static_cast<unsigned>(ceil(float(a->getCols() * a->getRows()) / float(threadsPerBlock * 2)));
 					if (blockNum <= 208) break;
 				}
 
@@ -254,7 +254,7 @@ namespace YuiOkusora
 				unsigned blockNum = 1, threadsPerBlock = 0;
 				for (int i = 0; i <= 5; ++i) {
 					threadsPerBlock = 32 << i;
-					blockNum = ceil(float(a->getCols() * a->getRows()) / float(threadsPerBlock * 2));
+					blockNum = static_cast<unsigned>(ceil(float(a->getCols() * a->getRows()) / float(threadsPerBlock * 2)));
 					if (blockNum <= 208) break;
 				}
 
@@ -284,14 +284,14 @@ namespace YuiOkusora
 				for (int i = 1; i <= 32;++i)
 				{
 					threadNum.x = i;
-					blockNum.x = ceil(float(a->getRows()) / float(i));
+					blockNum.x = static_cast<unsigned>(ceil(float(a->getRows()) / float(i)));
 					if (blockNum.x <= 208) break;
 				}
 				
 				for (int i = 1; i <= 32;++i)
 				{
 					threadNum.y = i;
-					blockNum.y = ceil(float(a->getCols()) / float(i));
+					blockNum.y = static_cast<unsigned>(ceil(float(a->getCols()) / float(i)));
 					if (blockNum.y <= 208) break;
 				}
 
@@ -321,7 +321,7 @@ namespace YuiOkusora
 				unsigned blockNum = 1, threadsPerBlock = 0;
 				for (int i = 0; i <= 5; ++i) {
 					threadsPerBlock = 32 << i;
-					blockNum = ceil(float(a->getCols() * a->getRows()) / float(threadsPerBlock * 2));
+					blockNum = static_cast<unsigned>(ceil(float(a->getCols() * a->getRows()) / float(threadsPerBlock * 2)));
 					if (blockNum <= 208) break;
 				}
 
@@ -353,7 +353,7 @@ namespace YuiOkusora
 				unsigned blockNum = 1, threadsPerBlock = 0;
 				for (int i = 0; i <= 5; ++i) {
 					threadsPerBlock = 32 << i;
-					blockNum = ceil(float(a->getCols() * a->getRows()) / float(threadsPerBlock * 2));
+					blockNum = static_cast<unsigned>(ceil(float(a->getCols() * a->getRows()) / float(threadsPerBlock * 2)));
 					if (blockNum <= 208) break;
 				}
 
@@ -368,7 +368,7 @@ namespace YuiOkusora
 				cudaFree(bPtr);
 			}
 
-			void dotProductMatrix(Matrix* a, Matrix& b)
+			void dotProductMatrix(Matrix* a, const Matrix& b)
 			{
 				float* aPtr = nullptr, * bPtr = nullptr, * cPtr = nullptr;
 				auto aSIZE = a->getRows() * a->getCols();
@@ -382,13 +382,13 @@ namespace YuiOkusora
 				cudaMemset(cPtr, 0, sizeof(float) * cSIZE);
 
 				ViewOfAdvancedMemory& viewA = a->load(0, sizeof(float) * aSIZE);
-				ViewOfAdvancedMemory& viewB = b.load(0, sizeof(float) * bSIZE);
+				ViewOfAdvancedMemory& viewB = const_cast<Matrix&>(b).load(0, sizeof(float) * bSIZE);
 
 				cudaMemcpy(aPtr, a->getViewPtr(viewA), sizeof(float) * aSIZE, cudaMemcpyHostToDevice);
-				cudaMemcpy(bPtr, b.getViewPtr(viewB), sizeof(float) * bSIZE, cudaMemcpyHostToDevice);
+				cudaMemcpy(bPtr, const_cast<Matrix&>(b).getViewPtr(viewB), sizeof(float) * bSIZE, cudaMemcpyHostToDevice);
 
 				a->unload(viewA);
-				b.unload(viewB);
+				const_cast<Matrix&>(b).unload(viewB);
 
 				dim3 blockNum(1,1,1), threadNum(1,1,1);
 
@@ -441,7 +441,7 @@ namespace YuiOkusora
 				unsigned blockNum = 1, threadsPerBlock = 0;
 				for (int i = 0; i <= 5; ++i) {
 					threadsPerBlock = 32 << i;
-					blockNum = ceil(float(a->getCols() * a->getRows()) / float(threadsPerBlock * 4));
+					blockNum = static_cast<unsigned>(ceil(float(a->getCols() * a->getRows()) / float(threadsPerBlock * 4)));
 					if (blockNum <= 208) break;
 				}
 
@@ -467,7 +467,7 @@ namespace YuiOkusora
 				unsigned blockNum = 1, threadsPerBlock = 0;
 				for (int i = 0; i <= 5; ++i) {
 					threadsPerBlock = 32 << i;
-					blockNum = ceil(float(a->getCols() * a->getRows()) / float(threadsPerBlock));
+					blockNum = static_cast<unsigned>(ceil(float(a->getCols() * a->getRows()) / float(threadsPerBlock)));
 					if (blockNum <= 208) break;
 				}
 
@@ -505,7 +505,7 @@ namespace YuiOkusora
 				unsigned blockNum = 1, threadsPerBlock = 0;
 				for (int i = 0; i <= 5; ++i) {
 					threadsPerBlock = 32 << i;
-					blockNum = ceil(float(aSIZE) / float(threadsPerBlock));
+					blockNum = static_cast<unsigned>(ceil(float(aSIZE) / float(threadsPerBlock)));
 					if (blockNum <= 208) break;
 				}
 
