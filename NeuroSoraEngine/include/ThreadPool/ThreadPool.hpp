@@ -1,11 +1,5 @@
 #pragma once
-#include <thread>
-#include <mutex>
-#include <condition_variable>
-#include <functional>
-#include <future>
-#include <queue>
-#include <vector>
+#include "NeuroSoraCore.hpp"
 
 class ThreadPool
 {

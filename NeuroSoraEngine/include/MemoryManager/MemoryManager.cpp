@@ -1,11 +1,4 @@
 #include "MemoryManager.hpp"
-#include "./AdvancedMemory/AdvancedMemory.hpp"
-#include <stdio.h>
-#include <iostream>
-#include <string>
-#include <thread>
-#include <vector>
-#include "Timer.hpp"
 
 MemoryManager& MemoryManager::getManager()
 {

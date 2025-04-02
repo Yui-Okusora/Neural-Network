@@ -1,7 +1,10 @@
 #pragma once
-#include <Windows.h>
-#include <unordered_map>
-#include <shared_mutex>
+
+#define NeuroSoraCore_AdvancedMemory
+
+#include "NeuroSoraCore.hpp"
+
+#include "MemoryManager/MemoryManager.hpp"
 
 class ViewOfAdvancedMemory
 {

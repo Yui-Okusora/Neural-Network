@@ -1,6 +1,12 @@
 #pragma once
-#include "HeaderLibs.hpp"
+
+#define NeuroSoraCore_Net
+
+#include "NeuroSoraCore.hpp"
+
+#include "Matrix/Matrix.hpp"
 #include "Layer/Layer.hpp"
+#include "AdvancedMemory/AdvancedMemory.hpp"
 
 class Net
 {

@@ -1,8 +1,9 @@
-#include "include/Matrix/Matrix.hpp"
-#include "include/Net/Net.hpp"
-#include "include/Layer/FullyConnLayer/FullyConnLayer.hpp"
-#include "iostream"
-#include <chrono>
+#include "include/NeuroSoraCore.hpp"
+
+#include "AdvancedMemory/AdvancedMemory.hpp"
+#include "MemoryManager/MemoryManager.hpp"
+#include "Net/Net.hpp"
+#include "Layer/FullyConnLayer/FullyConnLayer.hpp"
 
 #define SIZE size_t(100)
 #define SIZE1 size_t(100)

@@ -1,6 +1,4 @@
 #include "AdvancedMemory.hpp"
-#include "./MemoryManager/MemoryManager.hpp"
-#include <stdio.h>
 
 bool AdvancedMemory::isValid() const
 {

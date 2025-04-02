@@ -1,7 +1,5 @@
 #include "FullyConnLayer.hpp"
-#include <thread>
-#include "Timer.hpp"
-#include "ThreadPool/ThreadPool.hpp"
+
 
 FullyConnLayer::FullyConnLayer(unsigned inpNeuronNum, unsigned neuronNum, ActivationType activation)
 {

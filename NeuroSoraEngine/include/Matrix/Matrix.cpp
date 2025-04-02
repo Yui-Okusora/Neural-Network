@@ -1,5 +1,4 @@
 #include "Matrix.hpp"
-#include "Timer.hpp"
 
 Matrix::Matrix()
 {

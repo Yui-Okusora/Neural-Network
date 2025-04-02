@@ -1,8 +1,6 @@
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
 #include "Matrix.hpp"
-//#include <chrono>
-//#include <iostream>
 
 namespace YuiOkusora
 {

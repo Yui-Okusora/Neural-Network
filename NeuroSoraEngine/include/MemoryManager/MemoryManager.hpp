@@ -1,12 +1,10 @@
 #pragma once
 
-#include <Windows.h>
-#include <queue>
-#include <list>
-#include <memory>
-#include <atomic>
-#include <shared_mutex>
-#include <string>
+#define NeuroSoraCore_MemoryManager
+
+#include "NeuroSoraCore.hpp"
+
+#include "AdvancedMemory/AdvancedMemory.hpp"
 
 class AdvancedMemory;
 

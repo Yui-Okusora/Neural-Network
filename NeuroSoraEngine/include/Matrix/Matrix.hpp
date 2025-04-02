@@ -1,8 +1,20 @@
 #pragma once
-#include "HeaderLibs.hpp"
+
+#define NeuroSoraCore_Matrix
+
+#include "NeuroSoraCore.hpp"
+
 #include "AdvancedMemory/AdvancedMemory.hpp"
 #include "MemoryManager/MemoryManager.hpp"
-#include <thread>
+
+enum class ActivationType
+{
+    ReLU,
+    LReLU,
+    Sigmoid,
+    Tanh,
+    SoftMax
+};
 
 class Matrix
 {

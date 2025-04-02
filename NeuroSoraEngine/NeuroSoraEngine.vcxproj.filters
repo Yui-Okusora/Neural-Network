@@ -18,7 +18,7 @@
     <ClInclude Include="include\Matrix\Matrix.hpp">
       <Filter>include\Matrix</Filter>
     </ClInclude>
-    <ClInclude Include="include\HeaderLibs.hpp">
+    <ClInclude Include="include\NeuroSoraCore.hpp">
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="include\Layer\FullyConnLayer\FullyConnLayer.hpp">

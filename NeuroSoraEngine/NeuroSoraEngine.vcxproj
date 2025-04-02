@@ -98,7 +98,7 @@
   <ItemGroup>
     <ClInclude Include="include\AdvancedMemory\AdvancedMemory.hpp" />
     <ClInclude Include="include\Layer\FullyConnLayer\FullyConnLayer.hpp" />
-    <ClInclude Include="include\HeaderLibs.hpp" />
+    <ClInclude Include="include\NeuroSoraCore.hpp" />
     <ClInclude Include="include\Layer\Layer.hpp" />
     <ClInclude Include="include\Matrix\Matrix.hpp" />
     <ClInclude Include="include\MemoryManager\MemoryManager.hpp" />

@@ -5,6 +5,8 @@ VisualStudioVersion = 17.13.35818.85
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NeuroSoraEngine", "NeuroSoraEngine\NeuroSoraEngine.vcxproj", "{D4170265-C890-B0A4-FEF3-1E6FFCF560C6}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NeuroSoraApplication", "NeuroSoraApplication\NeuroSoraApplication.vcxproj", "{FBBF1028-F6DF-472E-B032-5B0FC4D2604D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -15,6 +17,10 @@ Global
 		{D4170265-C890-B0A4-FEF3-1E6FFCF560C6}.Debug|x64.Build.0 = Debug|x64
 		{D4170265-C890-B0A4-FEF3-1E6FFCF560C6}.Release|x64.ActiveCfg = Release|x64
 		{D4170265-C890-B0A4-FEF3-1E6FFCF560C6}.Release|x64.Build.0 = Release|x64
+		{FBBF1028-F6DF-472E-B032-5B0FC4D2604D}.Debug|x64.ActiveCfg = Debug|x64
+		{FBBF1028-F6DF-472E-B032-5B0FC4D2604D}.Debug|x64.Build.0 = Debug|x64
+		{FBBF1028-F6DF-472E-B032-5B0FC4D2604D}.Release|x64.ActiveCfg = Release|x64
+		{FBBF1028-F6DF-472E-B032-5B0FC4D2604D}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

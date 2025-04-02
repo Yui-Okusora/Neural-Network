@@ -1,7 +1,8 @@
 #pragma once
-#include <vector>
-#include <string>
-#include <iostream>
+
+#define NeuroSoraCore_BaseLayer
+
+#include "NeuroSoraCore.hpp"
 #include "Matrix/Matrix.hpp"
 
 class Layer

@@ -1,7 +1,9 @@
 #pragma once
-#include "Matrix/Matrix.hpp"
+
+#define NeuroSoraCore_FCLayer
+
+#include "NeuroSoraCore.hpp"
 #include "Layer/Layer.hpp"
-#include <memory>
 
 class FullyConnLayer : public Layer
 {
