@@ -34,7 +34,7 @@ These are modules that make up this framework.
   - Fully Connected Layer.
   - Convolution Layer (coming soon).
 
-## Requirements 
+## Requirements (only work for below)
 
   - Windows 11 64-bit
   - NVIDIA GPU (recommended RTX A2000 or above)
