@@ -1,23 +1,28 @@
 #pragma once
 #include "NeuroSoraCore.hpp"
 
-class ThreadPool
+namespace NeuroSoraCore
 {
-public:
-    // // Constructor to creates a thread pool with given
-    // number of threads
-    ThreadPool(size_t num_threads = std::thread::hardware_concurrency());
-    ~ThreadPool();
 
-    // Enqueue task for execution by the thread pool
-    void enqueue(std::function<void()> task);
+    class ThreadPool
+    {
+    public:
+        // // Constructor to creates a thread pool with given
+        // number of threads
+        ThreadPool(size_t num_threads = std::thread::hardware_concurrency());
+        ~ThreadPool();
 
-private:
-    std::vector<std::thread> threads_;
-    std::queue<std::function<void()> > tasks_;
-    std::mutex queue_mutex_;
-    std::condition_variable cv_;
-    bool stop_ = false;
-};
+        // Enqueue task for execution by the thread pool
+        void enqueue(std::function<void()> task);
 
-static ThreadPool threadPool1;
+    private:
+        std::vector<std::thread> threads_;
+        std::queue<std::function<void()> > tasks_;
+        std::mutex queue_mutex_;
+        std::condition_variable cv_;
+        bool stop_ = false;
+    };
+
+}
+
+static NeuroSoraCore::ThreadPool threadPool1;

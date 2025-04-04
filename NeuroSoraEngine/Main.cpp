@@ -19,6 +19,8 @@ int main()
 
 	srand((unsigned int)time(0));
 
+	using namespace NeuroSoraCore;
+
 	Net net1;
 
 	std::chrono::high_resolution_clock::time_point start, end;
